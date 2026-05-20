@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AskBubble · 设置</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #e0e0f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+    }
+    h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #a0a0ff;
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: #8888bb;
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+    label:first-of-type { margin-top: 0; }
+    select, input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      background: #12122a;
+      border: 1px solid #3a3a6e;
+      border-radius: 8px;
+      color: #e0e0f0;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    select:focus, input:focus { border-color: #5a5aee; }
+    select option { background: #1a1a2e; }
+    input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 10px;
+      background: #4a4aee;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #6060ff; }
+    #status {
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+      min-height: 18px;
+    }
+    .hint {
+      margin-top: 5px;
+      font-size: 11px;
+      color: #5a5a8a;
+      line-height: 1.5;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #2a2a4e;
+      margin: 18px 0 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>AskBubble · 设置</h1>
+
+  <label for="platformSelect">平台 <span style="color:#ff6b6b">*</span></label>
+  <select id="platformSelect">
+    <option value="">— 请选择平台 —</option>
+    <option value="deepseek">DeepSeek</option>
+    <option value="openai">OpenAI</option>
+    <option value="anthropic">Anthropic (Claude)</option>
+    <option value="moonshot">Moonshot (Kimi)</option>
+    <option value="zhipu">智谱 GLM</option>
+    <option value="doubao">豆包 (火山引擎)</option>
+    <option value="custom">自定义</option>
+  </select>
+
+  <label for="apiKey">API Key <span style="color:#ff6b6b">*</span></label>
+  <input type="password" id="apiKey" placeholder="选择平台后填写" disabled>
+  <p class="hint">Key 仅存储在本地浏览器，不会上传。</p>
+
+  <label for="model">模型</label>
+  <input type="text" id="model" list="model-list" placeholder="选择平台后自动推荐" autocomplete="off" disabled>
+  <datalist id="model-list"></datalist>
+
+  <label for="baseUrl">API Base URL</label>
+  <input type="text" id="baseUrl" placeholder="选择平台后自动填写" disabled>
+
+  <button id="save">保存</button>
+  <div id="status"></div>
+
+  <hr>
+  <p class="hint">使用方法：在任意网页选中文字 → 右键 → 「Ask AI」</p>
+
+  <script src="popup.js"></script>
+</body>
+</html>

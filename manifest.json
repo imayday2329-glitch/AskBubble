@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "AskBubble",
+  "version": "1.0",
+  "description": "Select text and ask AI in a bubble right beside it.",
+  "permissions": ["contextMenus", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AskBubble"
+  }
+}
