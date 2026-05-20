@@ -40,6 +40,12 @@ mark.aiq-highlight {
   outline: none;
   border: none;
   border-bottom: 2.5px solid rgba(120, 120, 255, 0.85);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+mark.aiq-highlight-active {
+  background: rgba(120, 120, 255, 0.55) !important;
+  border-bottom-color: rgba(140, 140, 255, 1) !important;
 }
 
 .aiq-window {
@@ -62,9 +68,9 @@ mark.aiq-highlight {
 }
 
 /* max-height 不放这里——会在 height transition 之前瞬间裁剪，导致收起无动画 */
-/* .aiq-window.aiq-minimized { */
+.aiq-window.aiq-minimized {
   /* height 由 JS 内联控制，class 只负责以下视觉样式 */
-/* } */
+}
 
 /* 折叠态：header 44px 但窗口仅显示 42px，按钮中心落在 22px，比可见中线 21px 低 1px。
    flex align-items:center 把 margin 计入排列尺寸，margin-bottom:2px 让按钮上移 1px。 */
