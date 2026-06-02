@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AskBubble",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Select text and ask AI in a bubble right beside it.",
   "permissions": ["contextMenus", "storage", "scripting"],
   "host_permissions": ["<all_urls>"],

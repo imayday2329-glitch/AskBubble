@@ -1037,16 +1037,173 @@ if (window.__aiqDestroy) window.__aiqDestroy();
     if (!msgs) return document.createElement('div');
     const el = document.createElement('div');
     el.className = `aiq-msg aiq-msg-${role}`;
-    el.textContent = content;
+    setMessageContent(el, role, content);
     msgs.appendChild(el);
     msgs.scrollTop = msgs.scrollHeight;
     return el;
   }
 
   function updateMessage(el, content) {
-    el.textContent = content;
+    const role = el.classList.contains('aiq-msg-assistant') ? 'assistant' : 'user';
+    setMessageContent(el, role, content);
     const msgs = el.closest('.aiq-messages');
     if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function setMessageContent(el, role, content) {
+    if (role === 'assistant') {
+      const text = String(content);
+      // 流式输出末尾的光标 ▋ 单独处理，避免参与 markdown 解析
+      const hasCursor = text.endsWith('▋');
+      const body = hasCursor ? text.slice(0, -1) : text;
+      el.innerHTML = renderMarkdown(body) + (hasCursor ? '<span class="aiq-cursor">▋</span>' : '');
+    } else {
+      el.textContent = content;
+    }
+  }
+
+  // 轻量 markdown 渲染器：先转义 HTML，再按块/行内规则替换。
+  // 支持：代码块 ```、行内代码 `、标题 # ~ ######、粗体 **、斜体 *、
+  // 删除线 ~~、链接 [text](url)（仅 http/https）、有序/无序列表、引用 >、分隔线 ---、段落与换行。
+  function renderMarkdown(src) {
+    if (!src) return '';
+    // 占位符使用 PUA 字符，避免与正文文本冲突
+    const CB_O = '\uE000', CB_C = '\uE001';
+    const IC_O = '\uE002', IC_C = '\uE003';
+
+    // 1) 抽出代码块占位
+    const codeBlocks = [];
+    let s = src.replace(/```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+      const i = codeBlocks.length;
+      codeBlocks.push({ lang, code });
+      return '\n' + CB_O + i + CB_C + '\n';
+    });
+
+    // 2) 全局 HTML 转义
+    s = escHtml(s);
+
+    // 3) 抽出行内代码占位
+    const inlineCodes = [];
+    s = s.replace(/`([^`\n]+?)`/g, (_, code) => {
+      const i = inlineCodes.length;
+      inlineCodes.push(code);
+      return IC_O + i + IC_C;
+    });
+
+    // 4) 按行处理块级元素
+    const lines = s.split('\n');
+    const out = [];
+    const cbLineRe = new RegExp('^' + CB_O + '(\\d+)' + CB_C + '$');
+    let i2 = 0;
+    while (i2 < lines.length) {
+      const line = lines[i2];
+
+      // 标题
+      const h = /^(#{1,6})\s+(.*)$/.exec(line);
+      if (h) {
+        const level = h[1].length;
+        out.push('<h' + level + ' class="aiq-md-h">' + inlineFormat(h[2]) + '</h' + level + '>');
+        i2++;
+        continue;
+      }
+
+      // 代码块占位（独占一行）
+      const cbm = cbLineRe.exec(line);
+      if (cbm) {
+        const { lang, code } = codeBlocks[+cbm[1]];
+        const attr = lang ? ' data-lang="' + escHtml(lang) + '"' : '';
+        out.push('<pre class="aiq-md-pre"' + attr + '><code>' + escHtml(code.replace(/\n$/, '')) + '</code></pre>');
+        i2++;
+        continue;
+      }
+
+      // 分隔线
+      if (/^\s*[-*_]{3,}\s*$/.test(line)) {
+        out.push('<hr class="aiq-md-hr">');
+        i2++;
+        continue;
+      }
+
+      // 引用块
+      if (/^&gt;\s?/.test(line)) {
+        const buf = [];
+        while (i2 < lines.length && /^&gt;\s?/.test(lines[i2])) {
+          buf.push(lines[i2].replace(/^&gt;\s?/, ''));
+          i2++;
+        }
+        out.push('<blockquote class="aiq-md-quote">' + inlineFormat(buf.join('<br>')) + '</blockquote>');
+        continue;
+      }
+
+      // 无序列表
+      if (/^\s*[-*+]\s+/.test(line)) {
+        const items = [];
+        while (i2 < lines.length && /^\s*[-*+]\s+/.test(lines[i2])) {
+          items.push(lines[i2].replace(/^\s*[-*+]\s+/, ''));
+          i2++;
+        }
+        out.push('<ul class="aiq-md-ul">' + items.map(t => '<li>' + inlineFormat(t) + '</li>').join('') + '</ul>');
+        continue;
+      }
+
+      // 有序列表
+      if (/^\s*\d+\.\s+/.test(line)) {
+        const items = [];
+        while (i2 < lines.length && /^\s*\d+\.\s+/.test(lines[i2])) {
+          items.push(lines[i2].replace(/^\s*\d+\.\s+/, ''));
+          i2++;
+        }
+        out.push('<ol class="aiq-md-ol">' + items.map(t => '<li>' + inlineFormat(t) + '</li>').join('') + '</ol>');
+        continue;
+      }
+
+      // 段落
+      if (line.trim() === '') {
+        out.push('');
+        i2++;
+        continue;
+      }
+      const para = [line];
+      i2++;
+      while (i2 < lines.length && lines[i2].trim() !== '' &&
+             !/^(#{1,6})\s+/.test(lines[i2]) &&
+             !/^\s*[-*+]\s+/.test(lines[i2]) &&
+             !/^\s*\d+\.\s+/.test(lines[i2]) &&
+             !/^&gt;\s?/.test(lines[i2]) &&
+             !/^\s*[-*_]{3,}\s*$/.test(lines[i2]) &&
+             !cbLineRe.test(lines[i2])) {
+        para.push(lines[i2]);
+        i2++;
+      }
+      out.push('<p class="aiq-md-p">' + inlineFormat(para.join('<br>')) + '</p>');
+    }
+
+    let html = out.filter(x => x !== '').join('');
+
+    // 5) 还原行内代码
+    const icRe = new RegExp(IC_O + '(\\d+)' + IC_C, 'g');
+    html = html.replace(icRe, (_, n) => {
+      return '<code class="aiq-md-code">' + escHtml(inlineCodes[+n]) + '</code>';
+    });
+
+    return html;
+  }
+
+  function inlineFormat(s) {
+    // 链接 [text](url)，仅允许 http/https/相对路径开头，防 javascript:
+    s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => {
+      if (!/^(https?:\/\/|\/|#)/i.test(url)) return m;
+      return `<a class="aiq-md-link" href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    });
+    // 粗体 **x** / __x__
+    s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+    // 斜体 *x* / _x_（避免吃掉粗体已替换的标签）
+    s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+    s = s.replace(/(^|[^_])_([^_\n]+)_(?!_)/g, '$1<em>$2</em>');
+    // 删除线 ~~x~~
+    s = s.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+    return s;
   }
 
   function setInputEnabled(id, enabled) {

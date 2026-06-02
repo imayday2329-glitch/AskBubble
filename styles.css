@@ -180,7 +180,6 @@ mark.aiq-highlight-active {
   padding: 8px 12px;
   border-radius: 8px;
   line-height: 1.55;
-  white-space: pre-wrap;
   word-break: break-word;
   font-size: 13px;
 }
@@ -191,6 +190,7 @@ mark.aiq-highlight-active {
   align-self: flex-end;
   max-width: 90%;
   border-bottom-right-radius: 3px;
+  white-space: pre-wrap;
 }
 
 .aiq-msg-assistant {
@@ -318,5 +318,114 @@ mark.aiq-highlight-active {
 .aiq-resend:hover {
   background: rgba(74, 74, 238, 0.25);
   color: #c0c0ff;
+}
+
+/* Markdown 渲染样式（仅作用于助手消息内部） */
+.aiq-msg-assistant .aiq-md-p {
+  margin: 0 0 8px 0;
+}
+.aiq-msg-assistant .aiq-md-p:last-child {
+  margin-bottom: 0;
+}
+.aiq-msg-assistant .aiq-md-h {
+  margin: 8px 0 4px 0;
+  font-weight: 600;
+  color: #d8ffd8;
+  line-height: 1.3;
+}
+.aiq-msg-assistant .aiq-md-h:first-child {
+  margin-top: 0;
+}
+.aiq-msg-assistant h1.aiq-md-h { font-size: 16px; }
+.aiq-msg-assistant h2.aiq-md-h { font-size: 15px; }
+.aiq-msg-assistant h3.aiq-md-h,
+.aiq-msg-assistant h4.aiq-md-h,
+.aiq-msg-assistant h5.aiq-md-h,
+.aiq-msg-assistant h6.aiq-md-h { font-size: 14px; }
+.aiq-msg-assistant .aiq-md-ul,
+.aiq-msg-assistant .aiq-md-ol {
+  margin: 0 0 8px 0;
+  padding-left: 22px;
+}
+.aiq-msg-assistant .aiq-md-ul:last-child,
+.aiq-msg-assistant .aiq-md-ol:last-child {
+  margin-bottom: 0;
+}
+.aiq-msg-assistant .aiq-md-ul li,
+.aiq-msg-assistant .aiq-md-ol li {
+  margin: 2px 0;
+}
+.aiq-msg-assistant strong { color: #e8ffe8; font-weight: 600; }
+.aiq-msg-assistant em { color: #d8ffd8; font-style: italic; }
+.aiq-msg-assistant del { opacity: 0.65; }
+.aiq-msg-assistant .aiq-md-link {
+  color: #88c0ff;
+  text-decoration: underline;
+  text-decoration-color: rgba(136, 192, 255, 0.45);
+}
+.aiq-msg-assistant .aiq-md-link:hover {
+  color: #b0d8ff;
+}
+.aiq-msg-assistant .aiq-md-code {
+  background: rgba(0, 0, 0, 0.3);
+  color: #ffe0a0;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+.aiq-msg-assistant .aiq-md-pre {
+  background: #0e1a0e;
+  border: 1px solid #2a4a2a;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 6px 0 8px 0;
+  overflow-x: auto;
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #d8f0d8;
+}
+.aiq-msg-assistant .aiq-md-pre:last-child {
+  margin-bottom: 0;
+}
+.aiq-msg-assistant .aiq-md-pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  border-radius: 0;
+}
+.aiq-msg-assistant .aiq-md-pre::-webkit-scrollbar {
+  height: 4px;
+}
+.aiq-msg-assistant .aiq-md-pre::-webkit-scrollbar-thumb {
+  background: #2a4a2a;
+  border-radius: 2px;
+}
+.aiq-msg-assistant .aiq-md-quote {
+  margin: 0 0 8px 0;
+  padding: 4px 10px;
+  border-left: 3px solid #4a8a4a;
+  background: rgba(74, 138, 74, 0.08);
+  color: #b8d8b8;
+  border-radius: 0 4px 4px 0;
+}
+.aiq-msg-assistant .aiq-md-quote:last-child {
+  margin-bottom: 0;
+}
+.aiq-msg-assistant .aiq-md-hr {
+  border: none;
+  border-top: 1px solid #3a5a3a;
+  margin: 8px 0;
+}
+.aiq-msg-assistant .aiq-cursor {
+  display: inline-block;
+  margin-left: 1px;
+  animation: aiq-blink 1s steps(2) infinite;
+}
+@keyframes aiq-blink {
+  to { opacity: 0; }
 }
 
